@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Campus planner home</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Geist:wght@400;500;600;700&amp;family=Geist+Mono:wght@400;500;600;700&amp;family=Space+Grotesk:wght@300;700&amp;display=swap">
+<style>
+body{margin:0;background:#121614;color-scheme:dark}
+:root{--font-display:'Instrument Serif',Georgia,serif;--font-ui:'Geist',system-ui,sans-serif;--font-body:'Geist',system-ui,sans-serif;--font-mono:'Geist Mono',ui-monospace,monospace;--font-brand:'Space Grotesk',system-ui,sans-serif}
+h1,h2,h3,h4{font-family:var(--font-display);font-weight:400!important;letter-spacing:-0.01em}
+#int-h,#up-h{font-size:42px!important;line-height:1!important}
+#week-h{font-size:32px!important;line-height:1.05!important}
+#grp-h,#dl-h{font-size:22px!important;line-height:1.1!important}
+#interests h3{font-size:26px!important}
+#interests h3 span{font-family:var(--font-ui);font-size:13px!important;letter-spacing:0}
+#updates h3{font-size:56px!important;line-height:1.02!important}
+#dlg-h{font-size:50px!important;line-height:1.02!important}
+#dlg-h + div span{font-family:var(--font-ui)}
+p{font-family:var(--font-body)}
+input::placeholder{color:#7D8A81}
+a{color:#BCC9BE}a:hover{color:#FFFFFF}
+button{font-family:inherit}
+::selection{background:#BCC9BE;color:#1B3D31}
+</style>
+
+</head><body>
+<div id="root"></div>
+<template id="tpl">
+
+<div style="position: relative; min-height: 100vh; background-color: #121614; background-image: radial-gradient(80% 50% at 50% -10%, rgba(78,138,114,0.18), transparent 70%), linear-gradient(rgba(188,201,190,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(188,201,190,0.04) 1px, transparent 1px); background-size: 100% 100%, 56px 56px, 56px 56px; font-family: var(--font-ui); color: #EEF2EE">
+
+<header style="background: rgba(18,22,20,0.9); border-bottom: 1px solid #2F3632">
+<div style="max-width: 1440px; margin: 0 auto; padding: 14px 32px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px">
+<a href="#week" aria-label="unmute home" style="display: flex; align-items: center; gap: 6px; text-decoration: none; color: #EEF2EE">
+<svg viewBox="0 0 120 120" width="34" height="34" aria-hidden="true"><path d="M24 18 V66 A36 36 0 0 0 96 66 V18" fill="none" stroke="#EEF2EE" stroke-width="13"></path><rect x="40" y="40" width="26" height="9" fill="#D2581F"></rect><rect x="40" y="55" width="34" height="9" fill="#BCC9BE"></rect><rect x="40" y="70" width="18" height="9" fill="#4E8A72"></rect></svg>
+<span style="font-family: var(--font-brand); font-size: 26px; letter-spacing: -0.05em; line-height: 1"><span style="font-weight: 700">un</span><span style="font-weight: 300; color: #8E9A91">mute</span></span>
+</a>
+<nav aria-label="Main" style="display: flex; gap: 4px; flex-wrap: wrap">
+<a href="#week" style="padding: 8px 14px; border-radius: 4px; background: #2C302C; font-size: 14px; font-weight: 500; text-decoration: none">Home</a>
+<a href="#interests" style="padding: 8px 14px; border-radius: 4px; font-size: 14px; font-weight: 500; text-decoration: none; color: #8E9A91">Explore</a>
+</nav>
+<div style="position: relative; display: flex; align-items: center; gap: 12px">
+<button type="button" aria-expanded="{{dropOpen}}" onClick="{{toggleDrop}}" style="display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; border: 1px solid #2F3632; border-radius: 4px; background: #1A1F1C; font-size: 14px; font-weight: 500; color: #EEF2EE; cursor: pointer">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>
+Deadlines
+<span style="font-size: 12px; font-weight: 700; color: #FFF4EC; background: #A7410F; border-radius: 3px; padding: 1px 7px">{{dlCount}}</span>
+</button>
+<sc-if value="{{dropOpen}}" hint-placeholder-val="{{ false }}">
+<div role="dialog" aria-label="Deadlines this week" style="position: absolute; top: 52px; right: 48px; width: 340px; background: #1A1F1C; border: 1px solid #2F3632; border-radius: 6px; box-shadow: 0 16px 40px rgba(0,0,0,0.5); padding: 14px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; align-items: center; padding: 2px 4px 6px"><span style="font-size: 15px; font-weight: 600">Deadlines</span><span style="font-size: 12px; color: #8E9A91">This week</span></div>
+<sc-for list="{{dlAll}}" as="x" hint-placeholder-count="4">
+<button type="button" onClick="{{x.open}}" style="display: flex; align-items: center; gap: 10px; padding: 10px; border: 0; border-radius: 4px; background: {{x.rowBg}}; cursor: pointer; text-align: left; color: #EEF2EE">
+<span style="{{x.pillStyle}}">{{x.short}}</span>
+<span style="display: flex; flex-direction: column; gap: 2px; flex: 1"><span style="font-size: 14px; font-weight: 500">{{x.title}}</span><span style="font-size: 12px; color: #8E9A91">{{x.when}}</span></span>
+</button>
+</sc-for>
+</div>
+</sc-if>
+<div aria-label="Your profile" role="img" style="width: 36px; height: 36px; border-radius: 50%; background: #2F3632; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; color: #D3DCD5">ME</div>
+</div>
+</div>
+</header>
+<sc-if value="{{bannerOpen}}" hint-placeholder-val="{{ true }}">
+<div role="status" style="background: #0D110F; color: #FFFFFF; border-bottom: 1px solid rgba(232,116,58,0.5)">
+<div style="max-width: 1440px; margin: 0 auto; padding: 10px 32px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px">
+<span style="display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; font-family: var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: #E8743A; white-space: nowrap"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: #E8743A; box-shadow: 0 0 0 4px rgba(232,116,58,0.25)"></span>Live on campus</span><span style="font-size: 12px; font-weight: 600; font-family: var(--font-mono); border: 1px solid #E8743A; color: #E8743A; border-radius: 3px; padding: 2px 10px; font-variant-numeric: tabular-nums">{{countdownShort}} left</span>
+<span style="font-size: 15px; font-weight: 500; flex: 1 1 320px">{{urgent.title}} closes tonight at 11:59 PM · {{urgent.source}}</span>
+<button type="button" onClick="{{urgent.open}}" style="height: 34px; padding: 0 14px; border: 0; border-radius: 4px; background: #A7410F; color: #FFF4EC; font-size: 14px; font-weight: 600; cursor: pointer">Open form</button>
+<button type="button" aria-label="Dismiss" onClick="{{hideBanner}}" style="width: 34px; height: 34px; border: 0; border-radius: 4px; background: transparent; color: #FFFFFF; cursor: pointer; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"></path></svg></button>
+</div>
+</div>
+</sc-if>
+
+<main style="max-width: 1440px; margin: 0 auto; padding: 32px 32px 64px; display: flex; flex-direction: column; gap: 40px">
+<div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px 32px; padding: 8px 0 4px">
+<h1 style="margin: 0; font-size: 44px; line-height: 1.1; letter-spacing: -0.005em; max-width: 960px; color: #EEF2EE">Good evening. <span style="color: #BCC9BE">7 things</span> on your week, <em style="color: #E8743A">1 closes tonight.</em></h1>
+<p style="margin: 0; display: flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #8E9A91"><span aria-hidden="true" style="width: 7px; height: 7px; border-radius: 50%; background: #BCC9BE; box-shadow: 0 0 0 4px rgba(188,201,190,0.18)"></span>Thu 15 Oct · 6 groups listening</p>
+</div>
+
+
+<div style="display: flex; flex-direction: column; gap: 16px">
+<div role="region" aria-label="Closing soon" style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; background: #24170F; border: 1px solid #4A2614; border-radius: 6px; padding: 12px 16px">
+<span style="font-size: 14px; font-weight: 600; color: #E8743A; white-space: nowrap">Closing soon</span>
+<div style="display: flex; flex-wrap: wrap; gap: 8px; flex: 1 1 400px; min-width: 0">
+<sc-for list="{{dlAll}}" as="c" hint-placeholder-count="4">
+<button type="button" onClick="{{c.open}}" style="display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 12px 0 6px; border: 1px solid #4A2614; border-radius: 3px; background: #1A1F1C; font-size: 13px; font-weight: 500; color: #EEF2EE; cursor: pointer; white-space: nowrap"><span style="{{c.pillStyle}}">{{c.short}}</span>{{c.title}}</button>
+</sc-for>
+</div>
+<button type="button" onClick="{{toggleDrop}}" style="height: 34px; padding: 0 8px; border: 0; background: transparent; font-size: 13px; font-weight: 500; color: #E8743A; cursor: pointer; white-space: nowrap">See all</button>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: stretch">
+<aside aria-labelledby="grp-h" style="flex: 1 1 0; min-width: 220px; background: #1A1F1C; border: 1px solid #2F3632; border-radius: 8px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; align-items: center; justify-content: space-between">
+<h2 id="grp-h" style="margin: 0; font-size: 18px; font-weight: 600">Your groups</h2>
+<span style="font-size: 12px; color: #8E9A91">{{groupCount}} connected</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<sc-for list="{{chatGroups}}" as="gr" hint-placeholder-count="6">
+<div style="display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 4px">
+<span aria-hidden="true" style="{{gr.avatarStyle}}">{{gr.initials}}</span>
+<span style="display: flex; flex-direction: column; gap: 1px; flex: 1; min-width: 0">
+<span style="font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{gr.name}}</span>
+<span style="font-size: 12px; color: #8E9A91">{{gr.status}}</span>
+</span>
+<sc-if value="{{gr.hasNew}}" hint-placeholder-val="{{ false }}">
+<span style="font-size: 11px; font-weight: 700; color: #E8743A; background: #2E1A0F; border-radius: 3px; padding: 2px 8px">{{gr.newCount}} new</span>
+</sc-if>
+</div>
+</sc-for>
+</div>
+<sc-if value="{{addOpen}}" hint-placeholder-val="{{ false }}">
+<form onSubmit="{{connectGroup}}" style="display: flex; flex-direction: column; gap: 8px; padding: 12px; border: 1px solid #2F3632; border-radius: 6px; background: #161B18">
+<label for="invite" style="font-size: 13px; font-weight: 500">Paste the group’s invite link</label>
+<input id="invite" type="url" placeholder="https://chat.whatsapp.com/…" style="height: 38px; padding: 0 10px; border: 1px solid #46504A; border-radius: 4px; background: #1A1F1C; font-family: inherit; font-size: 13px">
+<p style="margin: 0; font-size: 12px; line-height: 1.45; color: #8E9A91">Our bot joins as a silent listener. It never posts. Ask your group admin if you’re unsure.</p>
+<div style="display: flex; gap: 8px">
+<button type="submit" style="flex: 1; height: 36px; border: 0; border-radius: 4px; background: #BCC9BE; color: #1B3D31; font-size: 13px; font-weight: 500; cursor: pointer">Connect</button>
+<button type="button" onClick="{{toggleAdd}}" style="flex: 1; height: 36px; border: 1px solid #2F3632; border-radius: 4px; background: #1A1F1C; font-size: 13px; font-weight: 500; color: #EEF2EE; cursor: pointer">Cancel</button>
+</div>
+</form>
+</sc-if>
+<div style="flex: 1"></div>
+<button type="button" onClick="{{toggleAdd}}" style="display: flex; align-items: center; justify-content: center; gap: 8px; height: 40px; border: 1px dashed #46504A; border-radius: 4px; background: #1A1F1C; font-size: 14px; font-weight: 500; color: #EEF2EE; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Add group</button>
+</aside>
+<section id="week" aria-labelledby="week-h" style="flex: 3 1 0; min-width: min(100%, 640px); background: #1A1F1C; border: 1px solid #2F3632; border-radius: 8px; padding: 24px; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<h2 id="week-h" style="margin: 0; font-size: 24px; font-weight: 600">Your week</h2>
+<p style="margin: 0; font-size: 14px; color: #8E9A91">Thu 15 – Wed 21 Oct · 7 things on your calendar</p>
+</div>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px">
+<div role="group" aria-label="Saved plans" style="display: flex; padding: 4px; gap: 4px; background: #2C302C; border-radius: 4px">
+<button type="button" aria-pressed="true" style="height: 32px; padding: 0 12px; border: 0; border-radius: 3px; background: #1A1F1C; box-shadow: 0 1px 2px rgba(0,0,0,0.08); font-size: 13px; font-weight: 500; color: #EEF2EE; cursor: pointer">Plan A · Balanced</button>
+<button type="button" aria-pressed="false" style="height: 32px; padding: 0 12px; border: 0; border-radius: 3px; background: transparent; font-size: 13px; font-weight: 500; color: #8E9A91; cursor: pointer">Plan B · Career focus</button>
+</div>
+<button type="button" style="display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; border: 0; border-radius: 4px; background: #BCC9BE; color: #1B3D31; font-size: 14px; font-weight: 500; cursor: pointer">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"></path><path d="M19 17v4M17 19h4"></path></svg>
+Generate plan
+</button>
+</div>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px; font-size: 13px; color: #D3DCD5"><span style="font-size: 11px; font-weight: 600; font-family: var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: #8E9A91">Lines</span><span style="display: flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 16px; height: 16px; flex: none; border-radius: 50%; background: #1B3D31; color: #BCC9BE; box-shadow: inset 0 0 0 1.5px #4E8A72; display: inline-flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; font-family: var(--font-mono)">E</span>Events</span><span style="display: flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 16px; height: 16px; flex: none; border-radius: 50%; background: #5E1616; color: #F3DADA; box-shadow: inset 0 0 0 1.5px #9A3434; display: inline-flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; font-family: var(--font-mono)">O</span>Opportunities</span><span style="display: flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 16px; height: 16px; flex: none; border-radius: 50%; background: #BCC9BE; color: #1B3D31; box-shadow: inset 0 0 0 1.5px #BCC9BE; display: inline-flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; font-family: var(--font-mono)">A</span>Announcements</span><span style="display: flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 16px; height: 16px; flex: none; border-radius: 50%; background: #A7410F; color: #FFF4EC; box-shadow: inset 0 0 0 1.5px #D2581F; display: inline-flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; font-family: var(--font-mono)">D</span>Deadlines</span></div>
+<form onSubmit="{{askSubmit}}" style="display: flex; flex-direction: column; gap: 10px; padding: 14px; border: 1px solid #46504A; border-radius: 6px; background: #161B18">
+<div style="display: flex; align-items: center; gap: 10px; background: #1A1F1C; border: 1px solid #2F3632; border-radius: 4px; padding: 6px 6px 6px 14px">
+<span style="color: #8E9A91; display: flex"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"></path><path d="M19 17v4M17 19h4"></path></svg></span>
+<label for="ask" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Ask AI about your week</label>
+<input id="ask" type="text" placeholder="Ask anything: “What’s on this weekend?” or “Plan my Thursday around the hackathon”" style="flex: 1; min-width: 0; height: 40px; border: 0; outline: none; background: transparent; font-family: inherit; font-size: 15px; color: #EEF2EE">
+<button type="submit" aria-label="Send" style="width: 40px; height: 40px; flex: none; border: 0; border-radius: 4px; background: #BCC9BE; color: #1B3D31; cursor: pointer; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<button type="button" style="height: 30px; padding: 0 12px; border: 1px solid #2F3632; border-radius: 3px; background: #1A1F1C; font-size: 13px; color: #D3DCD5; cursor: pointer">Anything on AI this week?</button>
+<button type="button" style="height: 30px; padding: 0 12px; border: 1px solid #2F3632; border-radius: 3px; background: #1A1F1C; font-size: 13px; color: #D3DCD5; cursor: pointer">What clashes on Saturday?</button>
+<button type="button" style="height: 30px; padding: 0 12px; border: 1px solid #2F3632; border-radius: 3px; background: #1A1F1C; font-size: 13px; color: #D3DCD5; cursor: pointer">Internships for 2nd years</button>
+<button type="button" style="height: 30px; padding: 0 12px; border: 1px solid #2F3632; border-radius: 3px; background: #1A1F1C; font-size: 13px; color: #D3DCD5; cursor: pointer">Summarise my groups today</button>
+</div>
+</form>
+
+
+<div style="overflow-x: auto">
+<div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; min-width: 600px">
+
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 8px; border: 1.5px solid #BCC9BE; border-radius: 6px; min-height: 280px; background: #1A1F1C">
+<div style="display: flex; align-items: baseline; justify-content: space-between; gap: 4px"><span style="font-size: 11px; font-weight: 600; font-family: var(--font-mono); letter-spacing: -0.02em; white-space: nowrap">Thu 15</span><span style="font-size: 10px; font-weight: 600; color: #1B3D31; background: #BCC9BE; border-radius: 3px; padding: 1px 5px">Today</span></div>
+<button type="button" onClick="{{openDetail}}" style="display: flex; flex-direction: column; gap: 3px; text-align: left; padding: 7px 7px; border: 1px solid #46504A; border-left: 3px solid #BCC9BE; border-radius: 4px; background: #2C302C; color: #EEF2EE; cursor: pointer">
+<span role="img" aria-label="Announcement" title="Announcement" style="display: flex"><span aria-hidden="true" style="width: 16px; height: 16px; flex: none; border-radius: 50%; background: #BCC9BE; color: #1B3D31; box-shadow: inset 0 0 0 1.5px #BCC9BE; display: inline-flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; font-family: var(--font-mono)">A</span></span>
+<span style="font-size: 13px; font-weight: 500">Library open till 10 PM this week</span><span style="display: flex; align-items: baseline; gap: 5px; font-size: 11px; line-height: 1.3; color: #8E9A91"><span aria-hidden="true" style="width: 6px; height: 6px; flex: none; border-radius: 50%; border: 2px solid #BCC9BE; background: #1A1F1C; transform: translateY(1px)"></span>Central library</span>
+</button>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 8px; border: 1px solid #2F3632; border-radius: 6px; min-height: 280px; background: #1A1F1C">
+<span style="font-size: 11px; font-weight: 600; font-family: var(--font-mono); letter-spacing: -0.02em; white-space: nowrap">Fri 16</span>
+<button type="button" onClick="{{openDetail}}" style="display: flex; flex-direction: column; gap: 3px; text-align: left; padding: 7px 7px; border: 1px solid #2A4A3D; border-left: 3px solid #4E8A72; border-radius: 4px; background: #16271F; color: #EEF2EE; cursor: pointer">
+<span role="img" aria-label="Event" title="Event" style="display: flex"><span aria-hidden="true" style="width: 16px; height: 16px; flex: none; border-radius: 50%; background: #1B3D31; color: #BCC9BE; box-shadow: inset 0 0 0 1.5px #4E8A72; display: inline-flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; font-family: var(--font-mono)">E</span></span>
+<span style="font-size: 13px; font-weight: 500">Coding club weekly meet</span>
+<span style="font-size: 12px; color: #8E9A91">5:00 PM</span><span style="display: flex; align-items: baseline; gap: 5px; font-size: 11px; line-height: 1.3; color: #8E9A91"><span aria-hidden="true" style="width: 6px; height: 6px; flex: none; border-radius: 50%; border: 2px solid #BCC9BE; background: #1A1F1C; transform: translateY(1px)"></span>Lab 3</span>
+</button>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 8px; border: 1px solid #2F3632; border-radius: 6px; min-height: 280px; background: #1A1F1C">
+<span style="font-size: 11px; font-weight: 600; font-family: var(--font-mono); letter-spacing: -0.02em; white-space: nowrap">Sat 17</span>
+<button type="button" onClick="{{openDetail}}" style="display: flex; flex-direction: column; gap: 3px; text-align: left; padding: 7px 7px; border: 1px solid #2A4A3D; border-left: 3px solid #4E8A72; border-radius: 4px; background: #16271F; color: #EEF2EE; cursor: pointer">
+<span role="img" aria-label="Event" title="Event" style="display: flex"><span aria-hidden="true" style="width: 16px; height: 16px; flex: none; border-radius: 50%; background: #1B3D31; color: #BCC9BE; box-shadow: inset 0 0 0 1.5px #4E8A72; display: inline-flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; font-family: var(--font-mono)">E</span></span>
+<span style="font-size: 13px; font-weight: 500">Gen AI workshop</span>
+<span style="font-size: 12px; color: #8E9A91">2:00 PM</span><span style="display: flex; align-items: baseline; gap: 5px; font-size: 11px; line-height: 1.3; color: #8E9A91"><span aria-hidden="true" style="width: 6px; height: 6px; flex: none; border-radius: 50%; border: 2px solid #BCC9BE; background: #1A1F1C; transform: translateY(1px)"></span>Seminar Hall 2</span>
+</button>
+<button type="button" onClick="{{openDetail}}" style="display: flex; flex-direction: column; gap: 3px; text-align: left; padding: 7px 7px; border: 1px solid #4A2222; border-left: 3px solid #9A3434; border-radius: 4px; background: #241313; color: #EEF2EE; cursor: pointer">
+<span role="img" aria-label="Opportunity" title="Opportunity" style="display: flex"><span aria-hidden="true" style="width: 16px; height: 16px; flex: none; border-radius: 50%; background: #5E1616; color: #F3DADA; box-shadow: inset 0 0 0 1.5px #9A3434; display: inline-flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; font-family: var(--font-mono)">O</span></span>
+<span style="font-size: 13px; font-weight: 500">ML research intern interview</span>
+<span style="font-size: 12px; color: #8E9A91">11:00 AM</span><span style="display: flex; align-items: baseline; gap: 5px; font-size: 11px; line-height: 1.3; color: #8E9A91"><span aria-hidden="true" style="width: 6px; height: 6px; flex: none; border-radius: 50%; border: 2px solid #BCC9BE; background: #1A1F1C; transform: translateY(1px)"></span>CS dept</span>
+</button>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 8px; border: 1px dashed #46504A; border-radius: 6px; min-height: 280px; background: #161B18">
+<span style="font-size: 11px; font-weight: 600; font-family: var(--font-mono); letter-spacing: -0.02em; white-space: nowrap">Sun 18</span>
+<p style="margin: auto 0; text-align: center; font-size: 12px; color: #8E9A91">Nothing planned</p>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 8px; border: 1px solid #2F3632; border-radius: 6px; min-height: 280px; background: #1A1F1C">
+<span style="font-size: 11px; font-weight: 600; font-family: var(--font-mono); letter-spacing: -0.02em; white-space: nowrap">Mon 19</span>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 8px; border: 1px solid #2F3632; border-radius: 6px; min-height: 280px; background: #1A1F1C">
+<span style="font-size: 11px; font-weight: 600; font-family: var(--font-mono); letter-spacing: -0.02em; white-space: nowrap">Tue 20</span>
+<button type="button" onClick="{{openDetail}}" style="display: flex; flex-direction: column; gap: 3px; text-align: left; padding: 7px 7px; border: 1px solid #2A4A3D; border-left: 3px solid #4E8A72; border-radius: 4px; background: #16271F; color: #EEF2EE; cursor: pointer">
+<span role="img" aria-label="Event" title="Event" style="display: flex"><span aria-hidden="true" style="width: 16px; height: 16px; flex: none; border-radius: 50%; background: #1B3D31; color: #BCC9BE; box-shadow: inset 0 0 0 1.5px #4E8A72; display: inline-flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; font-family: var(--font-mono)">E</span></span>
+<span style="font-size: 13px; font-weight: 500">Debate society auditions</span>
+<span style="font-size: 12px; color: #8E9A91">4:00 PM</span><span style="display: flex; align-items: baseline; gap: 5px; font-size: 11px; line-height: 1.3; color: #8E9A91"><span aria-hidden="true" style="width: 6px; height: 6px; flex: none; border-radius: 50%; border: 2px solid #BCC9BE; background: #1A1F1C; transform: translateY(1px)"></span>Main auditorium</span>
+</button>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 8px; border: 1px solid #2F3632; border-radius: 6px; min-height: 280px; background: #1A1F1C">
+<span style="font-size: 11px; font-weight: 600; font-family: var(--font-mono); letter-spacing: -0.02em; white-space: nowrap">Wed 21</span>
+<button type="button" onClick="{{openDetail}}" style="display: flex; flex-direction: column; gap: 3px; text-align: left; padding: 7px 7px; border: 1px solid #46504A; border-left: 3px solid #BCC9BE; border-radius: 4px; background: #2C302C; color: #EEF2EE; cursor: pointer">
+<span role="img" aria-label="Announcement" title="Announcement" style="display: flex"><span aria-hidden="true" style="width: 16px; height: 16px; flex: none; border-radius: 50%; background: #BCC9BE; color: #1B3D31; box-shadow: inset 0 0 0 1.5px #BCC9BE; display: inline-flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; font-family: var(--font-mono)">A</span></span>
+<span style="font-size: 13px; font-weight: 500">Mid-sem timetable released</span>
+</button>
+<button type="button" onClick="{{openDetail}}" style="display: flex; flex-direction: column; gap: 3px; text-align: left; padding: 7px 7px; border: 1px solid #2A4A3D; border-left: 3px solid #4E8A72; border-radius: 4px; background: #16271F; color: #EEF2EE; cursor: pointer">
+<span role="img" aria-label="Event" title="Event" style="display: flex"><span aria-hidden="true" style="width: 16px; height: 16px; flex: none; border-radius: 50%; background: #1B3D31; color: #BCC9BE; box-shadow: inset 0 0 0 1.5px #4E8A72; display: inline-flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; font-family: var(--font-mono)">E</span></span>
+<span style="font-size: 13px; font-weight: 500">Founder talk: building in college</span>
+<span style="font-size: 12px; color: #8E9A91">3:00 PM</span><span style="display: flex; align-items: baseline; gap: 5px; font-size: 11px; line-height: 1.3; color: #8E9A91"><span aria-hidden="true" style="width: 6px; height: 6px; flex: none; border-radius: 50%; border: 2px solid #BCC9BE; background: #1A1F1C; transform: translateY(1px)"></span>E-Cell room</span>
+</button>
+</div>
+
+</div>
+</div>
+</section>
+<aside aria-labelledby="dl-h" style="flex: 1 1 0; min-width: 220px; background: #1A1F1C; border: 1px solid #2F3632; border-radius: 8px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; align-items: center; justify-content: space-between">
+<h2 id="dl-h" style="margin: 0; font-size: 18px; font-weight: 600">Deadlines</h2>
+<span style="font-size: 12px; font-weight: 600; color: #E8743A; background: #2E1A0F; border-radius: 3px; padding: 3px 10px">{{dlCount}} open</span>
+</div>
+<button type="button" onClick="{{urgent.open}}" style="text-align: left; border: 1px solid #7A3A18; background: #24170F; border-radius: 6px; padding: 14px; display: flex; flex-direction: column; gap: 4px; cursor: pointer; color: #EEF2EE">
+<span style="font-size: 11px; font-weight: 600; font-family: var(--font-mono); color: #E8743A; text-transform: uppercase; letter-spacing: 0.08em">Closes in</span>
+<span style="font-size: 28px; line-height: 1.15; font-weight: 600; font-family: var(--font-mono); letter-spacing: -0.02em; color: #E8743A; font-variant-numeric: tabular-nums; text-shadow: 0 0 20px rgba(232,116,58,0.45)">{{countdown}}</span>
+<span style="font-size: 15px; font-weight: 600">{{urgent.title}}</span>
+<span style="font-size: 12px; color: #8E9A91">{{urgent.when}} · {{urgent.source}}</span>
+</button>
+<sc-for list="{{dlRest}}" as="dl" hint-placeholder-count="3">
+<button type="button" onClick="{{dl.open}}" style="text-align: left; border: 1px solid #2F3632; background: #1A1F1C; border-radius: 6px; padding: 12px 14px; display: flex; flex-direction: column; gap: 3px; cursor: pointer; color: #EEF2EE">
+<span style="font-size: 15px; font-weight: 600; font-family: var(--font-mono); color: #E8743A">{{dl.left}}</span>
+<span style="font-size: 14px; font-weight: 600">{{dl.title}}</span>
+<span style="font-size: 12px; color: #8E9A91">{{dl.when}} · {{dl.source}}</span>
+</button>
+</sc-for>
+<div style="flex: 1"></div>
+<button type="button" onClick="{{toggleDrop}}" style="height: 36px; border: 0; background: transparent; font-size: 13px; font-weight: 500; color: #8E9A91; cursor: pointer">View all deadlines</button>
+</aside>
+</div>
+</div>
+
+<section id="interests" aria-labelledby="int-h" style="display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<h2 id="int-h" style="margin: 0; font-size: 22px; font-weight: 600">For your interests</h2>
+<p style="margin: 0; font-size: 14px; color: #8E9A91">Picked from your groups, based on what you follow</p>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 16px">
+<sc-for list="{{interests}}" as="g" hint-placeholder-count="3">
+<div style="flex: 1 1 320px; min-width: 0; background: #1A1F1C; border: 1px solid #2F3632; border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; align-items: center; justify-content: space-between">
+<h3 style="margin: 0; font-size: 16px; font-weight: 600">{{g.name}} <span style="font-weight: 400; color: #8E9A91; font-size: 13px">· {{g.position}}</span></h3>
+<div style="display: flex; gap: 6px">
+<button type="button" aria-label="Previous" onClick="{{g.prev}}" style="width: 32px; height: 32px; border: 1px solid #2F3632; border-radius: 4px; background: #1A1F1C; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #EEF2EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg></button>
+<button type="button" aria-label="Next" onClick="{{g.next}}" style="width: 32px; height: 32px; border: 1px solid #2F3632; border-radius: 4px; background: #1A1F1C; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #EEF2EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 18l6-6-6-6"></path></svg></button>
+</div>
+</div>
+<div style="overflow: hidden; border-radius: 6px">
+<div style="display: flex; transition: transform 450ms cubic-bezier(0.22, 1, 0.36, 1); transform: translateX(-{{g.offset}}%)">
+<sc-for list="{{g.slides}}" as="c" hint-placeholder-count="3">
+<div style="flex: 0 0 100%; box-sizing: border-box; padding: 0 1px">
+<div style="border: 1px solid #2F3632; border-radius: 6px; padding: 16px; display: flex; flex-direction: column; gap: 10px; min-height: 196px; box-sizing: border-box">
+<span style="{{c.badgeStyle}}"><span style="{{c.dotStyle}}">{{c.letter}}</span>{{c.kind}}</span>
+<button type="button" onClick="{{c.open}}" style="padding: 0; border: 0; background: transparent; text-align: left; font-size: 16px; font-weight: 600; color: #EEF2EE; cursor: pointer">{{c.title}}</button>
+<span style="{{c.metaStyle}}">{{c.meta}}</span>
+<sc-if value="{{c.hasPlace}}" hint-placeholder-val="{{ true }}"><span style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #D3DCD5"><span aria-hidden="true" style="width: 7px; height: 7px; flex: none; border-radius: 50%; border: 2px solid #BCC9BE; background: #1A1F1C"></span>{{c.place}}</span></sc-if>
+<span style="font-size: 12px; color: #8E9A91">from {{c.source}}</span>
+<div style="margin-top: auto; display: flex; gap: 8px">
+<button type="button" onClick="{{c.open}}" style="flex: 1 1 0; height: 40px; border: 1px solid #2F3632; border-radius: 4px; background: #2C302C; font-size: 14px; font-weight: 500; color: #EEF2EE; cursor: pointer">View details</button>
+<button type="button" style="flex: 1 1 0; display: flex; align-items: center; justify-content: center; gap: 6px; height: 40px; border: 1px solid #2F3632; border-radius: 4px; background: #1A1F1C; font-size: 14px; font-weight: 500; color: #EEF2EE; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Add to my week</button>
+</div>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+<div style="display: flex; justify-content: center; gap: 6px">
+<sc-for list="{{g.dots}}" as="d" hint-placeholder-count="4">
+<button type="button" aria-label="{{d.label}}" onClick="{{d.go}}" style="{{d.style}}"></button>
+</sc-for>
+</div>
+</div>
+</sc-for>
+</div>
+</section>
+
+<section id="updates" aria-labelledby="up-h" style="display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<h2 id="up-h" style="margin: 0; font-size: 22px; font-weight: 600">Around campus</h2>
+<p style="margin: 0; font-size: 14px; color: #8E9A91">Other updates from across campus, outside your interests</p>
+</div>
+<div style="display: flex; gap: 6px">
+<button type="button" aria-label="Previous update" onClick="{{prev}}" style="width: 32px; height: 32px; border: 1px solid #2F3632; border-radius: 4px; background: #1A1F1C; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #EEF2EE; width: 36px; height: 36px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg></button>
+<button type="button" aria-label="Next update" onClick="{{next}}" style="width: 32px; height: 32px; border: 1px solid #2F3632; border-radius: 4px; background: #1A1F1C; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #EEF2EE; width: 36px; height: 36px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 18l6-6-6-6"></path></svg></button>
+</div>
+</div>
+<div style="background: radial-gradient(120% 140% at 88% 0%, #2E5A49 0%, #1B3D31 42%, #0F241C 100%); color: #FFFFFF; border: 1px solid #2E5A49; border-radius: 10px; overflow: hidden">
+<div style="display: flex; transition: transform 550ms cubic-bezier(0.22, 1, 0.36, 1); transform: translateX(-{{offset}}%)">
+<sc-for list="{{updates}}" as="u" hint-placeholder-count="5">
+<div style="flex: 0 0 100%; box-sizing: border-box; padding: 48px; display: flex; flex-direction: column; gap: 16px; min-height: 300px">
+<span style="{{u.badgeStyle}}"><span style="{{u.dotStyle}}">{{u.letter}}</span>{{u.kind}}</span>
+<h3 style="margin: 0; font-size: 38px; line-height: 1.15; font-weight: 700; max-width: 820px">{{u.title}}</h3>
+<p style="margin: 0; font-size: 17px; line-height: 1.5; color: #D6DFD8; max-width: 720px">{{u.desc}}</p>
+<p style="margin: 0; font-size: 14px; color: #A9BCAF">{{u.meta}} · from {{u.source}}</p>
+<div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px">
+<button type="button" style="display: flex; align-items: center; gap: 6px; height: 44px; padding: 0 18px; border: 0; border-radius: 4px; background: #BCC9BE; color: #1B3D31; font-size: 14px; font-weight: 600; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Add to my week</button>
+<button type="button" onClick="{{openDetail}}" style="height: 44px; padding: 0 18px; border: 1px solid #4E8A72; border-radius: 4px; background: transparent; color: #FFFFFF; font-size: 14px; font-weight: 500; cursor: pointer">View details</button>
+</div>
+</div>
+</sc-for>
+</div>
+<div style="display: flex; align-items: center; gap: 14px; padding: 0 48px 32px">
+<div style="display: flex; align-items: center; gap: 6px">
+<sc-for list="{{dots}}" as="dot" hint-placeholder-count="5">
+<button type="button" aria-label="{{dot.label}}" onClick="{{dot.go}}" style="{{dot.style}}"></button>
+</sc-for>
+</div>
+<span style="font-size: 12px; font-family: var(--font-mono); color: #A9BCAF">{{position}}</span>
+</div>
+</div>
+</section>
+
+</main>
+<footer style="border-top: 1px solid #2F3632; overflow: hidden">
+<div style="max-width: 1440px; margin: 0 auto; padding: 40px 32px 0; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #8E9A91"><span>Mute the groups, not the opportunities.</span><span>Team Pathfinder · 2026</span></div>
+<p aria-hidden="true" style="margin: 0; padding: 0 24px; font-family: var(--font-display); font-size: clamp(120px, 22vw, 330px); line-height: 0.8; letter-spacing: -0.03em; text-align: center; color: transparent; background: linear-gradient(180deg, #BCC9BE 0%, rgba(188,201,190,0.06) 85%); -webkit-background-clip: text; background-clip: text; transform: translateY(12%)">unmute</p>
+</footer>
+
+<sc-if value="{{detailOpen}}" hint-placeholder-val="{{ true }}">
+<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(6,10,8,0.72); backdrop-filter: blur(3px); padding: 48px 16px">
+<div role="dialog" aria-modal="true" aria-labelledby="dlg-h" style="position: sticky; top: 48px; max-width: 980px; margin: 0 auto; background: #1A1F1C; border-radius: 10px; overflow: hidden; display: flex; flex-wrap: wrap; box-shadow: 0 24px 64px rgba(0,0,0,0.25)">
+
+<div style="flex: 1 1 340px; min-width: 0; background: {{d.panel}}; color: #FFFFFF; padding: 36px; display: flex; flex-direction: column; gap: 24px">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 13px; font-weight: 600; font-family: var(--font-mono); letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.82)">{{d.dayName}}</span>
+<span style="font-size: 120px; line-height: 0.9; font-weight: 400; font-family: var(--font-display); letter-spacing: -0.02em">{{d.dayNum}}</span>
+<span style="font-size: 22px; font-weight: 500">{{d.month}}</span>
+</div>
+<div style="background: rgba(255,255,255,0.12); border-radius: 6px; padding: 16px; display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 13px; color: rgba(255,255,255,0.82)">{{d.keyLabel}}</span>
+<span style="font-size: 18px; font-weight: 600">{{d.keyValue}}</span>
+<span style="font-size: 14px; font-weight: 500; color: rgba(255,255,255,0.82)">{{d.keyNote}}</span>
+</div>
+<div style="flex: 1"></div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 13px; color: rgba(255,255,255,0.82)">Original message</span>
+<p style="margin: 0; font-size: 14px; line-height: 1.55; color: #FFFFFF; background: rgba(0,0,0,0.2); border-radius: 4px; padding: 12px 14px">“{{d.msg}}”</p>
+<span style="font-size: 12px; color: rgba(255,255,255,0.82)">{{d.msgSource}}</span>
+</div>
+</div>
+
+<div style="flex: 999 1 420px; min-width: 0; padding: 36px; display: flex; flex-direction: column; gap: 22px">
+<div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px">
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<span style="{{d.badgeStyle}}"><span style="{{d.dotStyle}}">{{d.letter}}</span>{{d.kind}}</span>
+<span style="font-size: 12px; font-weight: 500; color: #D3DCD5; background: #2C302C; border-radius: 3px; padding: 4px 12px">{{d.match}}</span>
+</div>
+<button type="button" aria-label="Close" onClick="{{closeDetail}}" style="width: 40px; height: 40px; flex: none; border: 1px solid #2F3632; border-radius: 2px; background: #1A1F1C; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #EEF2EE"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"></path></svg></button>
+</div>
+<h3 id="dlg-h" style="margin: 0; font-size: 34px; line-height: 1.1; font-weight: 700">{{d.title}}</h3>
+<div style="display: flex; flex-wrap: wrap; gap: 18px 24px">
+<div style="display: flex; gap: 12px; align-items: flex-start; flex: 1 1 180px; min-width: 0"><svg style="width: 20px; height: 20px; flex: none; margin-top: 2px" viewBox="0 0 24 24" fill="none" stroke="#8E9A91" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg><div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 13px; color: #8E9A91">Date</span><span style="font-size: 15px; font-weight: 600">{{d.date}}</span></div></div>
+<div style="display: flex; gap: 12px; align-items: flex-start; flex: 1 1 180px; min-width: 0"><svg style="width: 20px; height: 20px; flex: none; margin-top: 2px" viewBox="0 0 24 24" fill="none" stroke="#8E9A91" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg><div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 13px; color: #8E9A91">Time</span><span style="font-size: 15px; font-weight: 600">{{d.time}}</span></div></div>
+<div style="display: flex; gap: 12px; align-items: flex-start; flex: 1 1 180px; min-width: 0"><svg style="width: 20px; height: 20px; flex: none; margin-top: 2px" viewBox="0 0 24 24" fill="none" stroke="#8E9A91" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-12a7 7 0 0 1 14 0c0 5.8-7 12-7 12z"></path><circle cx="12" cy="9" r="2.5"></circle></svg><div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 13px; color: #8E9A91">Location</span><span style="font-size: 15px; font-weight: 600">{{d.location}}</span></div></div>
+<div style="display: flex; gap: 12px; align-items: flex-start; flex: 1 1 180px; min-width: 0"><svg style="width: 20px; height: 20px; flex: none; margin-top: 2px" viewBox="0 0 24 24" fill="none" stroke="#8E9A91" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg><div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 13px; color: #8E9A91">Organizer</span><span style="font-size: 15px; font-weight: 600">{{d.organizer}}</span></div></div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h4 style="margin: 0; font-size: 18px; font-weight: 600">About</h4>
+<p style="margin: 0; font-size: 15px; line-height: 1.6; color: #D3DCD5">{{d.about}}</p>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: auto">
+<a href="#week" style="display: flex; align-items: center; justify-content: center; gap: 8px; height: 44px; border-radius: 4px; background: #BCC9BE; color: #1B3D31; font-size: 14px; font-weight: 500; text-decoration: none; flex: 1 1 160px">{{d.cta}}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M7 7h10v10"></path></svg></a>
+<button type="button" style="display: flex; align-items: center; justify-content: center; gap: 8px; height: 44px; border: 1px solid #2F3632; border-radius: 4px; background: #1A1F1C; color: #EEF2EE; font-size: 14px; font-weight: 500; cursor: pointer; flex: 1 1 160px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Add to my week</button>
+<button type="button" style="display: flex; align-items: center; justify-content: center; gap: 8px; height: 44px; border: 1px solid #2F3632; border-radius: 4px; background: #1A1F1C; color: #EEF2EE; font-size: 14px; font-weight: 500; cursor: pointer; flex: 1 1 160px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><path d="M16 6l-4-4-4 4M12 2v13"></path></svg>Share</button>
+</div>
+</div>
+
+</div>
+</div>
+</sc-if>
+</div>
+</template>
+<script type="text/plain" id="dc-src">
+class Component extends DCLogic {
+  componentDidMount() {
+    this._t = setInterval(() => this.setState({ tick: ((this.state && this.state.tick) || 0) + 1 }), 1000);
+  }
+  componentWillUnmount() {
+    clearInterval(this._t);
+  }
+  renderVals() {
+    const B = {
+      Deadline: ['#A7410F', '#FFF4EC', '#A7410F', 'D', '#D2581F'],
+      Event: ['#1B3D31', '#BCC9BE', '#1B3D31', 'E', '#4E8A72'],
+      Opportunity: ['#5E1616', '#F3DADA', '#5E1616', 'O', '#9A3434'],
+      Announcement: ['#BCC9BE', '#1B3D31', '#2C302C', 'A', '#BCC9BE']
+    };
+    const badge = (k) => 'align-self: flex-start; display: inline-flex; align-items: center; gap: 7px; padding: 2px 12px 2px 2px; border: 1.5px solid ' + B[k][4] + '; border-radius: 999px; background: #1A1F1C; font-size: 12px; font-weight: 600; color: #EEF2EE';
+    const dot = (k) => 'width: 20px; height: 20px; flex: none; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 11px; font-weight: 700; background: ' + B[k][0] + '; color: ' + B[k][1] + '; box-shadow: inset 0 0 0 1.5px ' + B[k][4];
+    const st = this.state || {};
+    const go = (key, n, to) => this.setState({ [key]: ((to % n) + n) % n });
+    const dotsFor = (key, n, i, on, off) => Array.from({ length: n }, (_, k) => ({
+      label: 'Go to slide ' + (k + 1),
+      go: () => go(key, n, k),
+      style: 'height: 8px; padding: 0; border: 0; border-radius: 1px; cursor: pointer; transition: width 300ms ease; width: ' + (k === i ? '24px; background: ' + on : '8px; background: ' + off)
+    }));
+    const D = (o) => Object.assign({ badgeStyle: badge(o.kind), dotStyle: dot(o.kind), letter: B[o.kind][3], panel: B[o.kind][2] }, o);
+    const sample = D({ kind: 'Event', title: 'Gen AI workshop', match: 'Matches AI & ML', dayName: 'Saturday', dayNum: '17', month: 'October', keyLabel: 'Registration closes', keyValue: 'Fri 16 Oct, 11:59 PM', keyNote: '1 day left', msg: 'hey guys AI club gen ai workshop this sat 2pm seminar hall 2!! reg link below, closes fri night. bring laptops. limited seats', msgSource: 'AI Club group · Wed 14 Oct, 8:12 PM', date: 'Sat 17 Oct 2026', time: '2:00 – 5:00 PM', location: 'Seminar Hall 2, Main block', organizer: 'AI Club', about: 'A hands-on session on building with generative AI models: prompting, simple app building and a short team project. Bring your laptop; open to all years, limited seats.', cta: 'Register' });
+    const card = (meta, o) => {
+      const d = D(o);
+      return { kind: o.kind, title: o.title, meta, source: o.organizer, place: o.location.replace(', ', ' · '), hasPlace: !/online|drive/i.test(o.location), badgeStyle: badge(o.kind), dotStyle: dot(o.kind), letter: B[o.kind][3], metaStyle: 'font-size: 13px; ' + (o.kind === 'Deadline' ? 'color: #E8743A; font-weight: 500' : 'color: #D3DCD5'), open: () => this.setState({ detail: d }) };
+    };
+    const groups = [
+      { key: 'ai', name: 'AI & ML', slides: [
+        card('Sat 24 Oct · 10:00 AM', { kind: 'Event', title: 'Hands-on LLM fine-tuning workshop', match: 'Matches AI & ML', dayName: 'Saturday', dayNum: '24', month: 'October', keyLabel: 'Registration closes', keyValue: 'Thu 22 Oct, 9:00 PM', keyNote: '7 days left', msg: 'LLM fine tuning workshop next sat 10am in SH1, register by thursday night, form in group description', msgSource: 'AI Club group · Thu 15 Oct, 1:40 PM', date: 'Sat 24 Oct 2026', time: '10:00 AM – 1:00 PM', location: 'Seminar Hall 1, Main block', organizer: 'AI Club', about: 'Learn how to adapt an open language model to your own data, with a guided notebook you can keep.', cta: 'Register' }),
+        card('Closes Mon 19 Oct · 4 days left', { kind: 'Deadline', title: 'AI hackathon registrations', match: 'Matches AI & ML, Hackathons', dayName: 'Monday', dayNum: '19', month: 'October', keyLabel: 'Closes', keyValue: 'Mon 19 Oct, 11:59 PM', keyNote: '4 days left', msg: 'reminder!! AI hackathon reg closes monday midnight, teams of 2-4, link pinned', msgSource: 'Coding club group · Wed 14 Oct, 6:05 PM', date: 'Mon 19 Oct 2026', time: 'by 11:59 PM', location: 'Online form', organizer: 'Coding club', about: 'Register a team of 2–4 for the campus AI hackathon. Problem statements are shared after registration closes.', cta: 'Open form' }),
+        card('Wed 21 Oct · 6:00 PM', { kind: 'Event', title: 'ML paper reading circle', match: 'Matches AI & ML', dayName: 'Wednesday', dayNum: '21', month: 'October', keyLabel: 'Sign-up', keyValue: 'Not needed', keyNote: 'Just show up', msg: 'paper reading circle this wed 6pm library seminar room, we are doing the attention paper', msgSource: 'AI Club group · Thu 15 Oct, 10:22 AM', date: 'Wed 21 Oct 2026', time: '6:00 – 7:30 PM', location: 'Library seminar room, Central library', organizer: 'AI Club', about: 'A weekly discussion of one machine learning paper. Read it beforehand if you can; beginners welcome.', cta: 'View in group' }),
+        card('Apply by 27 Oct', { kind: 'Opportunity', title: 'Research assistant for an NLP project', match: 'Matches AI & ML, Research', dayName: 'Apply by', dayNum: '27', month: 'October', keyLabel: 'Application deadline', keyValue: 'Tue 27 Oct', keyNote: '12 days left', msg: 'Prof is looking for 2 students for an NLP project, 2nd/3rd years, send CV by 27th', msgSource: 'CS dept notices · Tue 13 Oct, 4:15 PM', date: 'Apply by 27 Oct 2026', time: 'Part-time, semester long', location: 'CS dept, Academic block', organizer: 'CS dept', about: 'Two research assistant positions on a natural language processing project. Open to 2nd and 3rd years; send your CV to apply.', cta: 'Apply' })
+      ]},
+      { key: 'design', name: 'Design', slides: [
+        card('Apply by Tue 20 Oct · Online', { kind: 'Opportunity', title: 'UI/UX portfolio review by alumni', match: 'Matches Design', dayName: 'Apply by', dayNum: '20', month: 'October', keyLabel: 'Application deadline', keyValue: 'Tue 20 Oct', keyNote: '5 days left', msg: 'alumni doing 1:1 portfolio reviews, 10 slots, fill form by tuesday', msgSource: 'Design Collective group · Wed 14 Oct, 9:30 PM', date: 'Reviews on 24–25 Oct', time: '20-minute slots', location: 'Online', organizer: 'Design Collective', about: 'One-on-one portfolio feedback from alumni working in product design. Limited to 10 slots.', cta: 'Apply' }),
+        card('Closes Fri 23 Oct', { kind: 'Deadline', title: 'Fest poster design contest', match: 'Matches Design', dayName: 'Friday', dayNum: '23', month: 'October', keyLabel: 'Submissions close', keyValue: 'Fri 23 Oct, 6:00 PM', keyNote: '8 days left', msg: 'poster contest for fest! submit by friday 23rd 6pm, A3 size, theme in the doc', msgSource: 'Cultural committee group · Mon 12 Oct, 7:00 PM', date: 'Fri 23 Oct 2026', time: 'by 6:00 PM', location: 'Online submission', organizer: 'Cultural committee', about: 'Design the official poster for this year’s fest. The winning design is used across campus.', cta: 'Submit' }),
+        card('Thu 22 Oct · 4:00 PM', { kind: 'Event', title: 'Intro to motion design', match: 'Matches Design', dayName: 'Thursday', dayNum: '22', month: 'October', keyLabel: 'Seats', keyValue: 'First come, first served', keyNote: 'Bring a laptop', msg: 'motion design basics session thursday 4pm media lab, bring laptop', msgSource: 'Design Collective group · Thu 15 Oct, 12:10 PM', date: 'Thu 22 Oct 2026', time: '4:00 – 6:00 PM', location: 'Media lab, Design block', organizer: 'Design Collective', about: 'A beginner session on animating interfaces and simple motion graphics.', cta: 'View in group' })
+      ]},
+      { key: 'place', name: 'Placements', slides: [
+        card('Closes Sat 17 Oct · 2 days left', { kind: 'Deadline', title: 'Mock interview drive sign-up', match: 'Matches Placements', dayName: 'Saturday', dayNum: '17', month: 'October', keyLabel: 'Sign-up closes', keyValue: 'Sat 17 Oct, 8:00 PM', keyNote: '2 days left', msg: 'Mock interview drive for final years, sign up before saturday 8pm. Mandatory for placement registration.', msgSource: 'Placement Cell · Official · Wed 14 Oct, 11:00 AM', date: 'Sat 17 Oct 2026', time: 'by 8:00 PM', location: 'Online form', organizer: 'Placement Cell · Official', about: 'Sign up for mock interviews with seniors and faculty before the placement season.', cta: 'Sign up' }),
+        card('Fri 16 Oct · 3:00 PM', { kind: 'Event', title: 'Resume clinic with seniors', match: 'Matches Placements', dayName: 'Friday', dayNum: '16', month: 'October', keyLabel: 'Bring', keyValue: 'A printed resume', keyNote: 'Drop in anytime', msg: 'resume clinic friday 3pm at placement office, get your CV reviewed by seniors', msgSource: 'Placement Cell · Official · Thu 15 Oct, 9:00 AM', date: 'Fri 16 Oct 2026', time: '3:00 – 5:00 PM', location: 'Placement office, Admin block', organizer: 'Placement Cell · Official', about: 'Seniors who were placed last year review your resume one-on-one.', cta: 'View in group' }),
+        card('Tue 20 Oct · 11:00 AM', { kind: 'Event', title: 'Pre-placement talk', match: 'Matches Placements', dayName: 'Tuesday', dayNum: '20', month: 'October', keyLabel: 'Attendance', keyValue: 'Required to apply', keyNote: 'For final years', msg: 'PPT on tuesday 11am main auditorium, attendance compulsory for those applying', msgSource: 'Placement Cell · Official · Wed 14 Oct, 5:30 PM', date: 'Tue 20 Oct 2026', time: '11:00 AM – 12:30 PM', location: 'Main auditorium', organizer: 'Placement Cell · Official', about: 'A recruiting company presents its roles and process. Attendance is required to apply.', cta: 'View in group' }),
+        card('Shared 15 Oct', { kind: 'Announcement', title: 'Off-campus internship list for November', match: 'Matches Placements', dayName: 'Shared', dayNum: '15', month: 'October', keyLabel: 'Status', keyValue: 'Open now', keyNote: 'Deadlines vary by company', msg: 'November off campus internship list is up on the drive, check eligibility before applying', msgSource: 'Placement Cell · Official · Thu 15 Oct, 2:00 PM', date: 'Shared Thu 15 Oct', time: 'Rolling deadlines', location: 'Shared drive', organizer: 'Placement Cell · Official', about: 'A list of off-campus internships open in November, with eligibility and links for each.', cta: 'Open list' })
+      ]}
+    ];
+    const interests = groups.map((g) => {
+      const n = g.slides.length;
+      const i = st[g.key] || 0;
+      return { name: g.name, slides: g.slides, position: (i + 1) + ' of ' + n, offset: i * 100, prev: () => go(g.key, n, i - 1), next: () => go(g.key, n, i + 1), dots: dotsFor(g.key, n, i, '#BCC9BE', '#46504A') };
+    });
+    const updates = [
+      { kind: 'Opportunity', title: 'Summer research fellowship applications', desc: 'Departments are taking applications for summer research positions across CS, ECE and Mechanical.', meta: 'Apply by 30 Oct', source: 'Dept notices' },
+      { kind: 'Announcement', title: 'Hostel fee due date extended', desc: 'The hostel office has moved the fee deadline for every block, Hostel A to Hostel D.', meta: 'New date: 28 Oct', source: 'Hostel office, Hostel B' },
+      { kind: 'Event', title: 'Inter-college cricket trials', desc: 'Open trials for the college team ahead of the inter-college tournament.', meta: 'Sun 18 Oct · 7:00 AM · Main ground, Sports complex', source: 'Sports club' },
+      { kind: 'Opportunity', title: 'Campus ambassador program', desc: 'E-Cell is recruiting ambassadors to run startup events on campus.', meta: 'Apply by 25 Oct', source: 'E-Cell' },
+      { kind: 'Event', title: 'Photography walk around campus', desc: 'A sunrise walk around campus, all skill levels welcome.', meta: 'Sat 17 Oct · 6:30 AM · Starts at Main gate', source: 'Photo club' }
+    ].map((u) => Object.assign(u, { badgeStyle: badge(u.kind), dotStyle: dot(u.kind), letter: B[u.kind][3] }));
+    const dlData = [
+      { title: 'Infosys drive registration', when: 'Today, 11:59 PM', short: '6h', source: 'Placement Cell', secs: 0, d: D({ kind: 'Deadline', title: 'Infosys drive registration', match: 'Matches Placements', dayName: 'Today', dayNum: '15', month: 'October', keyLabel: 'Closes', keyValue: 'Thu 15 Oct, 11:59 PM', keyNote: 'Closing tonight', msg: 'All eligible final years must register for the Infosys drive by tonight 11:59 PM. Link below. No extensions.', msgSource: 'Placement Cell · Official · Tue 13 Oct, 10:00 AM', date: 'Thu 15 Oct 2026', time: 'by 11:59 PM', location: 'Online form', organizer: 'Placement Cell · Official', about: 'Registration for the Infosys campus drive. Only registered students can sit for the test.', cta: 'Open form' }) },
+      { title: 'Mock interview drive sign-up', when: 'Sat 17 Oct, 8:00 PM', short: '2d', left: '2 days', source: 'Placement Cell', d: D({ kind: 'Deadline', title: 'Mock interview drive sign-up', match: 'Matches Placements', dayName: 'Saturday', dayNum: '17', month: 'October', keyLabel: 'Sign-up closes', keyValue: 'Sat 17 Oct, 8:00 PM', keyNote: '2 days left', msg: 'Mock interview drive for final years, sign up before saturday 8pm.', msgSource: 'Placement Cell · Official · Wed 14 Oct, 11:00 AM', date: 'Sat 17 Oct 2026', time: 'by 8:00 PM', location: 'Online form', organizer: 'Placement Cell · Official', about: 'Sign up for mock interviews with seniors and faculty before the placement season.', cta: 'Sign up' }) },
+      { title: 'Hackathon team submission', when: 'Mon 19 Oct, 6:00 PM', short: '4d', left: '4 days', source: 'Coding club', d: D({ kind: 'Deadline', title: 'Hackathon team submission', match: 'Matches AI & ML, Hackathons', dayName: 'Monday', dayNum: '19', month: 'October', keyLabel: 'Submissions close', keyValue: 'Mon 19 Oct, 6:00 PM', keyNote: '4 days left', msg: 'final submissions for the hackathon close monday 6pm, upload repo link + 2 min demo video', msgSource: 'Coding club group · Thu 15 Oct, 9:40 AM', date: 'Mon 19 Oct 2026', time: 'by 6:00 PM', location: 'Online submission', organizer: 'Coding club', about: 'Submit your team’s repository link and a two-minute demo video.', cta: 'Submit' }) },
+      { title: 'Scholarship form', when: 'Tue 20 Oct, 5:00 PM', short: '5d', left: '5 days', source: 'Dept notices', d: D({ kind: 'Deadline', title: 'Scholarship form', match: 'For all students', dayName: 'Tuesday', dayNum: '20', month: 'October', keyLabel: 'Closes', keyValue: 'Tue 20 Oct, 5:00 PM', keyNote: '5 days left', msg: 'merit scholarship forms to be submitted at the dept office by tuesday 5pm with marksheets', msgSource: 'Dept notices · Mon 12 Oct, 3:30 PM', date: 'Tue 20 Oct 2026', time: 'by 5:00 PM', location: 'Dept office, Academic block', organizer: 'Dept notices', about: 'Submit the merit scholarship form with copies of your marksheets at the department office.', cta: 'View form' }) }
+    ];
+    const elapsed = st.tick || 0;
+    const rem = Math.max(0, 6 * 3600 + 12 * 60 + 8 - elapsed);
+    const hh = Math.floor(rem / 3600), mm = Math.floor((rem % 3600) / 60), ss = rem % 60;
+    const pad = (v) => (v < 10 ? '0' : '') + v;
+    const dlItems = dlData.map((x, k) => Object.assign({}, x, {
+      open: () => this.setState({ detail: x.d, drop: false }),
+      rowBg: k === 0 ? '#24170F' : 'transparent',
+      pillStyle: 'flex: none; font-size: 11px; font-weight: 600; font-family: var(--font-mono); border-radius: 3px; padding: 2px 8px; ' + (k === 0 ? 'color: #FFF4EC; background: #A7410F' : 'color: #E8743A; background: #2E1A0F')
+    }));
+    const palette = ['#16271F|#BCC9BE', '#2A1515|#F0B4B4', '#2A1A10|#E8743A', '#2C302C|#D3DCD5', '#16271F|#BCC9BE', '#2A1515|#F0B4B4', '#2C302C|#D3DCD5'];
+    const baseGroups = [
+      ['Placement Cell · Official', 'PC', 'Listening', 3],
+      ['AI Club', 'AI', 'Listening', 2],
+      ['Coding club', 'CC', 'Listening', 0],
+      ['Design Collective', 'DC', 'Listening', 1],
+      ['CSE 2nd year', 'CS', 'Listening', 0],
+      ['Hostel B', 'HB', 'Listening', 0]
+    ].concat(st.added ? [['New group', 'NG', 'Joining… a few minutes', 0]] : []);
+    const chatGroups = baseGroups.map((g, k) => {
+      const c = palette[k % palette.length].split('|');
+      return { name: g[0], initials: g[1], status: g[2], newCount: g[3], hasNew: g[3] > 0, avatarStyle: 'width: 34px; height: 34px; flex: none; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; background: ' + c[0] + '; color: ' + c[1] };
+    });
+    const n = updates.length;
+    const i = st.up || 0;
+    const detail = st.detail === undefined ? null : st.detail;
+    return {
+      chatGroups,
+      groupCount: chatGroups.length,
+      addOpen: !!st.addOpen,
+      toggleAdd: () => this.setState({ addOpen: !st.addOpen }),
+      connectGroup: (e) => { if (e && e.preventDefault) e.preventDefault(); this.setState({ addOpen: false, added: true }); },
+      askSubmit: (e) => { if (e && e.preventDefault) e.preventDefault(); },
+      dlCount: dlItems.length,
+      urgent: dlItems[0],
+      dlRest: dlItems.slice(1),
+      dlAll: dlItems,
+      countdown: hh + 'h ' + pad(mm) + 'm ' + pad(ss) + 's',
+      countdownShort: hh + 'h ' + pad(mm) + 'm',
+      dropOpen: !!st.drop,
+      toggleDrop: () => this.setState({ drop: !st.drop }),
+      bannerOpen: !st.bannerHidden,
+      hideBanner: () => this.setState({ bannerHidden: true }),
+      detailOpen: !!detail,
+      d: detail || sample,
+      openDetail: () => this.setState({ detail: sample }),
+      closeDetail: () => this.setState({ detail: null }),
+      interests,
+      updates,
+      offset: i * 100,
+      dots: dotsFor('up', n, i, '#BCC9BE', '#4E8A72'),
+      position: (i + 1) + ' / ' + n,
+      prev: () => go('up', n, i - 1),
+      next: () => go('up', n, i + 1)
+    };
+  }
+}
+</script>
+<script>
+class DCLogic{setState(p){this.state=Object.assign({},this.state||{},p);schedule();}}
+const Component=(new Function('DCLogic',document.getElementById('dc-src').textContent+';return Component;'))(DCLogic);
+const comp=new Component();
+const tplRoot=document.getElementById('tpl').content;
+const root=document.getElementById('root');
+function lookup(expr,scope){expr=expr.trim();if(expr==='true')return true;if(expr==='false')return false;
+  const parts=expr.split('.');let v=scope[parts[0]];for(let i=1;i<parts.length&&v!=null;i++)v=v[parts[i]];return v;}
+function interp(s,scope){return s.replace(/\{\{(.+?)\}\}/g,(_,e)=>{const v=lookup(e,scope);return v==null?'':String(v);});}
+function build(nodes,scope,out){for(const n of nodes){
+  if(n.nodeType===3){out.push(document.createTextNode(interp(n.nodeValue,scope)));continue;}
+  if(n.nodeType!==1)continue;const tag=n.tagName.toLowerCase();
+  if(tag==='sc-if'){if(lookup(n.getAttribute('value').replace(/[{}]/g,''),scope))build(n.childNodes,scope,out);continue;}
+  if(tag==='sc-for'){const list=lookup(n.getAttribute('list').replace(/[{}]/g,''),scope)||[];const as=n.getAttribute('as');
+    for(const item of list){const s=Object.create(scope);s[as]=item;build(n.childNodes,s,out);}continue;}
+  const el=document.createElementNS(n.namespaceURI,n.localName);
+  for(const a of n.attributes){if(a.name.startsWith('hint-'))continue;
+    if(a.name.startsWith('on')){const fn=lookup(a.value.replace(/[{}]/g,''),scope);el['__'+a.name]=fn;continue;}
+    el.setAttribute(a.name,interp(a.value,scope));}
+  const kids=[];build(n.childNodes,scope,kids);kids.forEach(k=>el.appendChild(k));out.push(el);}}
+const EV=['onclick','onsubmit'];
+function sameKind(a,b){return a.nodeType===b.nodeType&&(a.nodeType!==1||a.tagName===b.tagName);}
+function morph(parent,news){const olds=[...parent.childNodes];
+  news.forEach((nw,i)=>{const od=olds[i];
+    if(!od){parent.appendChild(nw);bind(nw);return;}
+    if(!sameKind(od,nw)){parent.replaceChild(nw,od);bind(nw);return;}
+    if(od.nodeType===3){if(od.nodeValue!==nw.nodeValue)od.nodeValue=nw.nodeValue;return;}
+    for(const a of [...od.attributes])if(!nw.hasAttribute(a.name))od.removeAttribute(a.name);
+    for(const a of nw.attributes)if(od.getAttribute(a.name)!==a.value)od.setAttribute(a.name,a.value);
+    EV.forEach(e=>{od['__'+e]=nw['__'+e];od[e]=nw['__'+e]?(ev)=>od['__'+e](ev):null;});
+    morph(od,[...nw.childNodes]);});
+  for(let i=news.length;i<olds.length;i++)parent.removeChild(olds[i]);}
+function bind(el){if(el.nodeType!==1)return;EV.forEach(e=>{if(el['__'+e])el[e]=(ev)=>el['__'+e](ev);});[...el.children].forEach(bind);}
+let queued=false;function schedule(){if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;render();});}
+function render(){const out=[];build(tplRoot.childNodes,comp.renderVals(),out);morph(root,out);}
+render();comp.componentDidMount&&comp.componentDidMount();
+</script>
+</body></html>
